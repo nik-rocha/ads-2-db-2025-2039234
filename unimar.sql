@@ -14,9 +14,9 @@
 -- JOIN turmas t ON t.id_turma = m.id_turma
 -- JOIN professor_disciplina_curso pdc ON pdc.id_pdc = t.id_pdc
 -- JOIN cursos c ON c.id_curso = pdc.id_curso
--- WHERE a.cidade LIKE 'M%' &&
--- a.idade_aluno > 19 &&
--- (m.status = 'Aprovado' || 'Cursando') &&
+-- WHERE a.cidade LIKE 'M%' AND
+-- a.idade_aluno > 19 AND
+-- m.status IN ('Aprovado', 'Cursando') AND
 -- c.valor_curso < 2000;
 
 -- Atividade 2:
@@ -33,8 +33,8 @@
 -- JOIN cursos c ON c.id_departamento = d.id_departamento
 -- JOIN grade_curricular gc ON gc.id_curso = c.id_curso
 -- JOIN disciplinas di ON di.id_disciplina = gc.id_grade_curricular
--- WHERE p.sobrenome LIKE '%A' &&
--- d.sigla = ('DCET' || 'DCS') &&
+-- WHERE p.sobrenome LIKE '%A' AND
+-- d.sigla IN ('DCET', 'DCS') AND
 -- d.nome LIKE '%A%';
 
 -- Atividade 3:
@@ -53,14 +53,26 @@
 -- LEFT JOIN cursos c ON c.id_curso = pdc.id_curso
 -- LEFT JOIN grade_curricular gd ON gd.id_curso = c.id_curso
 -- LEFT JOIN disciplinas d ON d.id_disciplina = gd.id_disciplina
--- WHERE a.cidade <> "Marília" &&
--- a.sobrenome LIKE '%r%' &&
+-- WHERE a.cidade <> "Marília" AND
+-- a.sobrenome LIKE '%r%' AND
 -- a.idade_aluno BETWEEN 18 AND 25;
 
 -- Atividade 4:
-SELECT
+SELECT 
+	CONCAT(a.nome,' ',a.sobrenome) AS NomeCompleto,
+    c.nome_curso NomeCurso,
+    n.media_final MediaFinal,
+    a.cidade CidadeAluno,
+    m.status StatusMatricula, 
+    CONCAT(p.nome,' ',p.sobrenome) AS NomeProfessor
 FROM alunos a
-JOIN matriculas m AS m.id_aluno = a.id_aluno
-
-
--- CURSO, NOTAS, MATRÍCULA, PROFESSOR, TURMA
+JOIN matriculas m ON m.id_aluno = a.id_aluno
+JOIN notas n ON n.id_matricula = m.id_matricula
+JOIN turmas t ON t.id_turma = m.id_turma
+JOIN professor_disciplina_curso pdc ON pdc.id_pdc = t.id_pdc
+JOIN cursos c ON c.id_curso = pdc.id_curso
+JOIN professores p ON p.id_professor = pdc.id_professor
+WHERE n.media_final > (SELECT AVG(nm.media_final) FROM notas nm) AND
+t.ano IN (2024, 2025) AND
+m.status IN ('Aprovado', 'Cursando') 
+ORDER BY n.media_final DESC
